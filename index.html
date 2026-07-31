@@ -1,0 +1,1999 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2a1535" />
+  <meta name="description" content="適合幼兒的注音符號聽音選字與認讀遊戲" />
+  <title>注音魔法屋</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root {
+      --ink: #2a1535;
+      --ink-2: #4e2b5e;
+      --pink: #ff5ba8;
+      --pink-soft: #ffd4e8;
+      --purple: #9967d8;
+      --cream: #fffaf2;
+      --white: #ffffff;
+      --yellow: #ffd85c;
+      --green: #5dcf9c;
+      --shadow: 0 12px 0 rgba(55, 24, 69, .12), 0 20px 40px rgba(55, 24, 69, .13);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(255,255,255,.9) 0 3px, transparent 4px),
+        radial-gradient(circle at 88% 22%, rgba(255,255,255,.75) 0 4px, transparent 5px),
+        linear-gradient(145deg, #f7c7e3 0%, #e4c9f8 54%, #bedcf8 100%);
+      background-size: 44px 44px, 64px 64px, auto;
+      overflow-x: hidden;
+    }
+
+    button, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, select:focus-visible { outline: 5px solid var(--yellow); outline-offset: 3px; }
+
+    .page-shell {
+      width: min(1160px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sparkle {
+      position: fixed;
+      z-index: 0;
+      color: rgba(255,255,255,.9);
+      font-size: clamp(22px, 4vw, 42px);
+      animation: float 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .sparkle.one { left: 3%; top: 18%; }
+    .sparkle.two { right: 4%; top: 52%; animation-delay: -1.3s; }
+    .sparkle.three { left: 7%; bottom: 8%; animation-delay: -2.1s; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 56px;
+      height: 56px;
+      border: 4px solid var(--ink);
+      border-radius: 19px;
+      background: var(--pink);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 29px;
+      line-height: 1;
+      transform: rotate(-5deg);
+      box-shadow: 0 5px 0 var(--ink);
+    }
+    .brand h1 { font-size: clamp(21px, 3vw, 32px); line-height: 1.05; margin: 0; letter-spacing: .03em; }
+    .brand p { margin: 5px 0 0; color: var(--ink-2); font-size: 14px; font-weight: 800; }
+
+    .star-counter {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: var(--white);
+      box-shadow: 0 5px 0 var(--ink);
+      font-size: 20px;
+      font-weight: 950;
+    }
+    .star-counter .star { color: #ffb700; font-size: 25px; }
+
+    .app {
+      background: rgba(255, 250, 247, .94);
+      border: 4px solid var(--ink);
+      border-radius: 36px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .app-tabs {
+      display: flex;
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 4px solid var(--ink);
+      background: #fff;
+    }
+    .tab {
+      flex: 1;
+      min-height: 54px;
+      border: 3px solid var(--ink);
+      border-radius: 18px;
+      background: #f7eafa;
+      color: var(--ink);
+      font-size: clamp(16px, 2.3vw, 20px);
+      font-weight: 950;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--ink);
+      transition: transform .12s, box-shadow .12s, background .12s;
+    }
+    .tab:hover { transform: translateY(-2px); }
+    .tab:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+    .tab.active { background: var(--pink); color: white; }
+
+    .game-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, .78fr) minmax(440px, 1.35fr);
+      min-height: 600px;
+    }
+
+    .side-panel {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px 24px;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255,255,255,.92) 0 100px, transparent 101px),
+        linear-gradient(160deg, #f5d1e8, #d7c4ed);
+      border-right: 4px solid var(--ink);
+      overflow: hidden;
+    }
+    .side-panel::before, .side-panel::after {
+      content: "★";
+      position: absolute;
+      color: rgba(255,255,255,.85);
+      font-size: 36px;
+      transform: rotate(13deg);
+    }
+    .side-panel::before { left: 24px; top: 26px; }
+    .side-panel::after { right: 25px; bottom: 48px; font-size: 26px; }
+
+    .speech-bubble {
+      position: relative;
+      z-index: 2;
+      width: min(270px, 95%);
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border: 3px solid var(--ink);
+      border-radius: 22px;
+      background: white;
+      font-size: 17px;
+      font-weight: 950;
+      text-align: center;
+      box-shadow: 0 6px 0 rgba(42, 21, 53, .15);
+    }
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      left: calc(50% - 10px);
+      bottom: -14px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-right: 3px solid var(--ink);
+      border-bottom: 3px solid var(--ink);
+      transform: rotate(45deg);
+    }
+
+    .mascot {
+      position: relative;
+      width: 225px;
+      height: 245px;
+      filter: drop-shadow(0 12px 0 rgba(55, 25, 67, .13));
+      animation: mascot-bob 2.7s ease-in-out infinite;
+    }
+    .ear {
+      position: absolute;
+      z-index: 1;
+      top: 5px;
+      width: 72px;
+      height: 132px;
+      background: var(--ink);
+      border: 4px solid var(--ink);
+    }
+    .ear::after {
+      content: "";
+      position: absolute;
+      inset: 20px 17px 26px;
+      border-radius: 50%;
+      background: #9c5fa7;
+      opacity: .55;
+    }
+    .ear.left { left: 21px; border-radius: 90% 18% 62% 40%; transform: rotate(-25deg); }
+    .ear.right { right: 21px; border-radius: 18% 90% 40% 62%; transform: rotate(25deg); }
+    .ear-ball {
+      position: absolute;
+      top: 2px;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--ink);
+      border-radius: 50%;
+      background: var(--pink);
+      z-index: 2;
+    }
+    .ear-ball.left { left: 15px; }
+    .ear-ball.right { right: 15px; }
+    .hood {
+      position: absolute;
+      z-index: 2;
+      left: 18px;
+      top: 58px;
+      width: 189px;
+      height: 165px;
+      border: 5px solid var(--ink);
+      border-radius: 50% 50% 44% 44%;
+      background: var(--ink);
+    }
+    .face {
+      position: absolute;
+      left: 21px;
+      top: 40px;
+      width: 138px;
+      height: 111px;
+      border-radius: 48% 48% 46% 46%;
+      background: #fff7ed;
+      border: 4px solid var(--ink);
+    }
+    .eye {
+      position: absolute;
+      top: 42px;
+      width: 18px;
+      height: 25px;
+      border-radius: 50%;
+      background: var(--ink);
+    }
+    .eye.left { left: 30px; transform: rotate(-8deg); }
+    .eye.right { right: 30px; transform: rotate(8deg); }
+    .eye::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      width: 5px;
+      height: 7px;
+      border-radius: 50%;
+      background: white;
+    }
+    .blush {
+      position: absolute;
+      top: 73px;
+      width: 23px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ff93b9;
+      opacity: .7;
+    }
+    .blush.left { left: 16px; }
+    .blush.right { right: 16px; }
+    .mouth {
+      position: absolute;
+      left: 58px;
+      top: 75px;
+      width: 19px;
+      height: 10px;
+      border-bottom: 3px solid var(--ink);
+      border-radius: 50%;
+    }
+    .skull {
+      position: absolute;
+      z-index: 5;
+      left: 75px;
+      top: -18px;
+      width: 41px;
+      height: 34px;
+      border: 3px solid var(--ink);
+      border-radius: 48% 48% 38% 38%;
+      background: var(--pink);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      font-size: 23px;
+      font-weight: 1000;
+      line-height: 1;
+    }
+    .body {
+      position: absolute;
+      left: 57px;
+      bottom: 0;
+      width: 111px;
+      height: 74px;
+      border: 5px solid var(--ink);
+      border-radius: 52% 52% 26% 26%;
+      background: var(--pink);
+      z-index: 1;
+    }
+    .body::before, .body::after {
+      content: "";
+      position: absolute;
+      top: 17px;
+      width: 50px;
+      height: 24px;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+      background: #fff7ed;
+      z-index: -1;
+    }
+    .body::before { left: -40px; transform: rotate(-20deg); }
+    .body::after { right: -40px; transform: rotate(20deg); }
+
+    .mascot-label {
+      z-index: 2;
+      margin: 11px 0 0;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.74);
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .content-panel { padding: clamp(20px, 4vw, 38px); }
+    .game-view, .learn-view { display: none; }
+    .game-view.active, .learn-view.active { display: block; }
+
+    .game-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .level-select {
+      min-height: 48px;
+      padding: 0 38px 0 14px;
+      border: 3px solid var(--ink);
+      border-radius: 15px;
+      color: var(--ink);
+      background: white;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .round-label { font-weight: 950; font-size: 17px; white-space: nowrap; }
+    .progress-track {
+      height: 14px;
+      margin-bottom: 22px;
+      border: 3px solid var(--ink);
+      border-radius: 99px;
+      background: #eadff0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      width: 10%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--pink), #b96edf);
+      transition: width .35s ease;
+    }
+
+    .question-card {
+      padding: 22px;
+      border: 3px solid var(--ink);
+      border-radius: 24px;
+      background: linear-gradient(135deg, #fff, #fff7fb);
+      text-align: center;
+      box-shadow: 0 7px 0 #ead7eb;
+    }
+    .question-card h2 { margin: 0 0 7px; font-size: clamp(23px, 4vw, 34px); }
+    .question-card p { margin: 0; color: #73517d; font-weight: 800; }
+    .listen-button {
+      width: 94px;
+      height: 94px;
+      margin: 18px auto 2px;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+      background: var(--pink);
+      color: white;
+      font-size: 42px;
+      cursor: pointer;
+      box-shadow: 0 8px 0 var(--ink);
+      transition: transform .12s, box-shadow .12s;
+    }
+    .listen-button:hover { transform: scale(1.04); }
+    .listen-button:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--ink); }
+    .listen-button.speaking { animation: pulse .65s ease-in-out infinite alternate; }
+    .listen-note { display: block; margin-top: 10px; font-size: 13px; color: #74547d; font-weight: 800; }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .answer {
+      min-height: 94px;
+      border: 4px solid var(--ink);
+      border-radius: 23px;
+      background: white;
+      color: var(--ink);
+      font-size: clamp(38px, 7vw, 55px);
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 7px 0 var(--ink);
+      transition: transform .12s, box-shadow .12s, background .15s;
+    }
+    .answer:hover { background: #fff0f7; transform: translateY(-2px); }
+    .answer:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--ink); }
+    .answer.correct { background: #bff3d7; animation: pop .35s ease; }
+    .answer.wrong { background: #ffd0dc; animation: shake .35s ease; }
+    .answer:disabled { cursor: default; opacity: 1; }
+
+    .feedback {
+      min-height: 45px;
+      margin-top: 18px;
+      padding: 10px 14px;
+      border-radius: 15px;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 950;
+      color: #67466f;
+    }
+    .feedback.good { color: #176c49; background: #d9f8e8; }
+    .feedback.try { color: #99405f; background: #ffe2eb; }
+
+    .learn-heading { margin: 0 0 7px; font-size: clamp(25px, 4vw, 34px); }
+    .learn-subtitle { margin: 0 0 20px; color: #73517d; font-weight: 800; }
+    .flashcard {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 17px 20px;
+      border: 3px solid var(--ink);
+      border-radius: 23px;
+      background: linear-gradient(135deg, #fff0f7, #f1e4ff);
+      box-shadow: 0 7px 0 #ddcbe3;
+    }
+    .flash-symbol {
+      display: grid;
+      place-items: center;
+      width: 100px;
+      height: 100px;
+      border: 4px solid var(--ink);
+      border-radius: 25px;
+      background: white;
+      font-size: 59px;
+      font-weight: 1000;
+      box-shadow: 0 6px 0 var(--ink);
+    }
+    .flash-word { font-size: clamp(21px, 3.5vw, 28px); font-weight: 1000; }
+    .flash-word small { display: block; margin-top: 6px; color: #79547e; font-size: 15px; }
+    .mini-listen {
+      width: 58px;
+      height: 58px;
+      border: 3px solid var(--ink);
+      border-radius: 50%;
+      background: var(--pink);
+      color: white;
+      font-size: 25px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--ink);
+    }
+
+    .symbol-section h3 { margin: 22px 0 10px; font-size: 17px; }
+    .symbol-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(46px, 1fr));
+      gap: 8px;
+    }
+    .symbol-button {
+      aspect-ratio: 1;
+      min-height: 48px;
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      background: white;
+      color: var(--ink);
+      font-size: clamp(22px, 3.5vw, 31px);
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 4px 0 var(--ink);
+      transition: transform .1s, background .1s;
+    }
+    .symbol-button:hover, .symbol-button.active { background: var(--pink-soft); transform: translateY(-2px); }
+    .symbol-button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+
+    .tone-box {
+      margin-top: 24px;
+      padding: 16px;
+      border: 3px dashed #8e5a9c;
+      border-radius: 20px;
+      background: #fbf3ff;
+    }
+    .tone-box h3 { margin: 0 0 11px; }
+    .tones { display: flex; flex-wrap: wrap; gap: 9px; }
+    .tone {
+      flex: 1 1 78px;
+      min-height: 52px;
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      background: white;
+      font-weight: 950;
+      cursor: pointer;
+    }
+    .tone:hover { background: var(--pink-soft); }
+
+    .round-modal {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(32, 13, 39, .6);
+      backdrop-filter: blur(5px);
+    }
+    .round-modal.show { display: grid; }
+    .modal-card {
+      width: min(430px, 100%);
+      padding: 30px;
+      border: 4px solid var(--ink);
+      border-radius: 30px;
+      background: #fffaf5;
+      text-align: center;
+      box-shadow: 0 12px 0 var(--ink);
+      animation: pop .35s ease;
+    }
+    .modal-icon { font-size: 62px; }
+    .modal-card h2 { margin: 6px 0 10px; font-size: 31px; }
+    .modal-card p { color: #72507c; font-weight: 850; font-size: 18px; }
+    .restart-button {
+      width: 100%;
+      min-height: 58px;
+      margin-top: 13px;
+      border: 4px solid var(--ink);
+      border-radius: 17px;
+      background: var(--pink);
+      color: white;
+      font-size: 19px;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 6px 0 var(--ink);
+    }
+
+    .confetti-piece {
+      position: fixed;
+      z-index: 30;
+      top: -20px;
+      width: 13px;
+      height: 20px;
+      border-radius: 4px;
+      pointer-events: none;
+      animation: confetti-fall 1.5s ease-in forwards;
+    }
+
+    .footer-note {
+      margin: 18px 0 0;
+      text-align: center;
+      color: rgba(42, 21, 53, .72);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    @keyframes float { 50% { transform: translateY(-12px) rotate(10deg); } }
+    @keyframes mascot-bob { 50% { transform: translateY(-7px) rotate(1deg); } }
+    @keyframes pulse { to { transform: scale(1.08); box-shadow: 0 10px 0 var(--ink), 0 0 0 12px rgba(255,91,168,.18); } }
+    @keyframes pop { 50% { transform: scale(1.06); } }
+    @keyframes shake { 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-5px); } }
+    @keyframes confetti-fall { to { transform: translateY(110vh) rotate(600deg); opacity: .9; } }
+
+    @media (max-width: 820px) {
+      .game-layout { grid-template-columns: 1fr; }
+      .side-panel {
+        min-height: 255px;
+        border-right: 0;
+        border-bottom: 4px solid var(--ink);
+        flex-direction: row;
+        gap: 22px;
+        padding: 16px;
+      }
+      .speech-bubble { width: 47%; margin: 0; }
+      .speech-bubble::after { left: auto; right: -13px; bottom: calc(50% - 9px); transform: rotate(-45deg); }
+      .mascot { width: 178px; height: 200px; scale: .8; transform-origin: center; margin: -12px -17px; }
+      .mascot-label { display: none; }
+      .content-panel { padding: 22px; }
+      .symbol-grid { grid-template-columns: repeat(7, minmax(42px, 1fr)); }
+    }
+
+    @media (max-width: 540px) {
+      .page-shell { width: min(100% - 16px, 1160px); padding-top: 12px; }
+      .topbar { align-items: flex-start; }
+      .brand-mark { width: 47px; height: 47px; font-size: 24px; }
+      .brand p { display: none; }
+      .star-counter { padding: 7px 12px; font-size: 17px; }
+      .app { border-radius: 25px; }
+      .app-tabs { padding: 10px; }
+      .tab { min-height: 49px; }
+      .side-panel { min-height: 205px; }
+      .speech-bubble { font-size: 15px; }
+      .mascot { scale: .68; margin: -24px -30px; }
+      .game-head { align-items: stretch; flex-direction: column; }
+      .level-select { width: 100%; }
+      .answers { gap: 10px; }
+      .answer { min-height: 79px; border-radius: 18px; }
+      .flashcard { grid-template-columns: 82px 1fr auto; padding: 14px; gap: 10px; }
+      .flash-symbol { width: 72px; height: 72px; border-radius: 18px; font-size: 46px; }
+      .mini-listen { width: 50px; height: 50px; }
+      .symbol-grid { grid-template-columns: repeat(6, minmax(40px, 1fr)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+
+    /* 方案 3：粉紫黏土花園主題 */
+    :root {
+      --ink: #563676;
+      --ink-2: #765789;
+      --pink: #f56eaa;
+      --pink-soft: #ffd6e7;
+      --purple: #8b62bd;
+      --cream: #fffaf0;
+      --yellow: #ffe487;
+      --green: #8eb95e;
+      --clay-shadow: 0 8px 0 rgba(85, 51, 111, .18), 0 18px 35px rgba(71, 42, 92, .18);
+    }
+
+    body {
+      background: #d8b9ec url("assets/garden-bg.png") center / cover no-repeat;
+      color: var(--ink);
+    }
+
+    .sparkle { display: none; }
+
+    [hidden] { display: none !important; }
+
+    .home-screen {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(390px, .9fr) minmax(610px, 1.1fr);
+      align-items: center;
+      gap: clamp(30px, 5vw, 84px);
+      width: min(1500px, calc(100% - 48px));
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0 auto;
+      padding: 126px 20px 42px;
+    }
+
+    .home-header {
+      position: absolute;
+      top: max(22px, env(safe-area-inset-top));
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .home-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #5d3b78;
+      text-shadow: 0 2px 0 rgba(255,255,255,.92);
+    }
+
+    .home-logo-mark {
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      border: 5px solid rgba(255,255,255,.96);
+      border-radius: 23px;
+      background: #8052af;
+      color: white;
+      font-size: 30px;
+      box-shadow: 0 0 0 4px #6e4698, 0 8px 0 rgba(74,43,96,.2), inset 0 4px 8px rgba(255,255,255,.26);
+    }
+
+    .home-logo strong {
+      display: block;
+      font-size: clamp(24px, 2.4vw, 36px);
+      font-weight: 1000;
+      line-height: 1.05;
+    }
+
+    .home-logo small {
+      display: block;
+      margin-top: 5px;
+      color: #936f9e;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .18em;
+    }
+
+    .home-sound-control {
+      width: 62px;
+      height: 62px;
+      border: 5px solid rgba(255,255,255,.96);
+      border-radius: 21px;
+      background: #fffaf2;
+      color: #744aa1;
+      font-size: 25px;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px #c19ad3, 0 7px 0 rgba(82,50,100,.18);
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .home-sound-control:hover { transform: translateY(-2px); }
+    .home-sound-control:active { transform: translateY(4px); box-shadow: 0 0 0 3px #c19ad3, 0 2px 0 rgba(82,50,100,.18); }
+
+    .home-characters {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 560px;
+    }
+
+    .home-greeting {
+      align-self: flex-end;
+      width: min(300px, 72%);
+      margin: 0 9% 8px 0;
+      padding: 18px 22px;
+      border: 5px solid rgba(255,255,255,.96);
+      border-radius: 24px;
+      background: rgba(255,250,242,.96);
+      color: #614178;
+      text-align: center;
+      box-shadow: 0 0 0 3px #c49bcf, 0 8px 0 rgba(85,50,104,.17);
+    }
+
+    .home-greeting strong { display: block; font-size: clamp(20px, 2vw, 28px); font-weight: 1000; }
+    .home-greeting span { display: block; margin-top: 4px; color: #a4547e; font-size: 14px; font-weight: 850; }
+
+    .home-mascots {
+      position: relative;
+      height: 470px;
+      width: 100%;
+    }
+
+    .home-mascot {
+      position: absolute;
+      bottom: 0;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 14px 10px rgba(70,43,84,.2));
+      animation: mascot-bob 3s ease-in-out infinite;
+    }
+
+    .home-kuromi {
+      z-index: 2;
+      left: -3%;
+      width: min(370px, 60%);
+    }
+
+    .home-melody {
+      z-index: 1;
+      right: -1%;
+      width: min(350px, 56%);
+      animation-duration: 3.3s;
+      animation-delay: -1.2s;
+    }
+
+    .home-menu-panel {
+      width: 100%;
+      padding: clamp(30px, 3vw, 44px);
+      border: 6px solid rgba(255,255,255,.96);
+      border-radius: 38px;
+      background: rgba(255,250,242,.97);
+      box-shadow: 0 0 0 5px #a77ac1, 0 13px 0 rgba(85,52,103,.18), 0 25px 60px rgba(75,43,91,.18);
+    }
+
+    .home-eyebrow {
+      margin: 0 0 7px;
+      color: #e16a9e;
+      font-size: 14px;
+      font-weight: 1000;
+      letter-spacing: .16em;
+    }
+
+    .home-menu-panel h1 {
+      margin: 0;
+      color: #5a3775;
+      font-size: clamp(34px, 4.2vw, 58px);
+      line-height: 1.08;
+      letter-spacing: .02em;
+    }
+    .home-menu-panel h1:focus { outline: none; }
+
+    .home-menu-subtitle {
+      margin: 12px 0 24px;
+      color: #8a6a91;
+      font-size: clamp(15px, 1.45vw, 19px);
+      font-weight: 800;
+      line-height: 1.6;
+    }
+
+    .home-game-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .home-game-card {
+      position: relative;
+      min-height: 220px;
+      padding: 22px 18px 19px;
+      border: 4px solid white;
+      border-radius: 26px;
+      background: #f4eaf9;
+      color: #5c3b75;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px #b58bc9, 0 8px 0 rgba(82,49,100,.17), inset 0 4px 9px rgba(255,255,255,.8);
+      transition: transform .16s, box-shadow .16s, background .16s;
+    }
+
+    .home-game-card:nth-child(2) {
+      background: #ffe3ee;
+      color: #a94574;
+      box-shadow: 0 0 0 3px #e38caf, 0 8px 0 rgba(121,53,86,.16), inset 0 4px 9px rgba(255,255,255,.8);
+    }
+
+    .home-game-card:nth-child(3) {
+      background: #eee4f7;
+      color: #654180;
+    }
+
+    .home-game-card:hover { transform: translateY(-5px); background: #fff4fa; }
+    .home-game-card:active { transform: translateY(5px); box-shadow: 0 0 0 3px #b58bc9, 0 2px 0 rgba(82,49,100,.17); }
+
+    .home-card-icon {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      margin-bottom: 18px;
+      border: 4px solid white;
+      border-radius: 18px;
+      background: #8153b1;
+      color: white;
+      font-size: 25px;
+      box-shadow: 0 0 0 2px rgba(99,62,128,.32), 0 5px 0 rgba(82,49,100,.16);
+    }
+
+    .home-game-card:nth-child(2) .home-card-icon { background: #ef72a7; }
+    .home-game-card:nth-child(3) .home-card-icon { background: #9a6bc1; }
+    .home-card-type {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 5px 10px;
+      border: 2px solid rgba(92, 59, 117, .2);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .78);
+      color: #76508f;
+      font-size: 12px;
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: .06em;
+    }
+    .home-card-type.is-test {
+      border-color: rgba(220, 157, 34, .32);
+      background: #fff0b8;
+      color: #8b5d00;
+    }
+    .home-card-title { display: block; margin-bottom: 8px; font-size: clamp(19px, 1.55vw, 23px); font-weight: 1000; word-break: keep-all; }
+    .home-card-copy { display: block; font-size: 14px; font-weight: 800; line-height: 1.5; }
+
+    .home-tip {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 24px 0 0;
+      color: #87648f;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .home-tip i { color: #e2689d; }
+
+    .page-shell {
+      width: min(1440px, calc(100% - 20px));
+      padding: 20px 0 30px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr) 82px;
+      align-items: center;
+      gap: 22px;
+      width: min(960px, calc(100% - 140px));
+      margin: 0 auto 14px;
+    }
+
+    .round-control {
+      width: 76px;
+      height: 76px;
+      border: 5px solid rgba(255,255,255,.92);
+      border-radius: 50%;
+      background: #8f68c2;
+      color: white;
+      font-size: 31px;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px #72529b, 0 8px 0 rgba(75,42,99,.24), inset 0 5px 8px rgba(255,255,255,.26);
+      text-shadow: 0 3px 2px rgba(64,37,88,.22);
+      transition: transform .12s, box-shadow .12s;
+    }
+
+    .round-control:hover { transform: translateY(-2px); }
+    .round-control:active { transform: translateY(5px); box-shadow: 0 0 0 4px #72529b, 0 2px 0 rgba(75,42,99,.24), inset 0 5px 8px rgba(255,255,255,.26); }
+
+    .progress-island {
+      min-height: 72px;
+      padding: 4px 12px 7px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .progress-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: clamp(17px, 2.3vw, 24px);
+      font-weight: 1000;
+      letter-spacing: .03em;
+      text-shadow: 0 2px 0 rgba(255,255,255,.95), 0 3px 8px rgba(83,50,103,.16);
+    }
+
+    .top-stars {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #a05e32;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    .journey-steps { display: flex; align-items: center; justify-content: center; gap: 0; }
+    .journey-step {
+      flex: 0 0 auto;
+      color: #bdb8c0;
+      font-size: clamp(22px, 2.2vw, 30px);
+      line-height: 1;
+      filter: drop-shadow(0 2px 0 rgba(255,255,255,.9));
+      transition: color .25s, scale .25s, filter .25s;
+    }
+    .journey-step.current { scale: 1.12; color: #a9a2ad; }
+    .journey-step.correct {
+      color: #ffd64f;
+      filter: drop-shadow(0 2px 0 #d29a28) drop-shadow(0 0 5px rgba(255,214,79,.55));
+    }
+    .journey-step.wrong { color: #aaa4ad; }
+    .journey-step + .journey-step { margin-left: 18px; }
+
+    .app {
+      position: relative;
+      z-index: 2;
+      width: min(960px, calc(100% - 140px));
+      margin: 0 auto;
+      border: 6px solid rgba(255,255,255,.92);
+      border-radius: 42px;
+      background: rgba(255,250,240,.96);
+      box-shadow: 0 0 0 5px #9f74b7, 0 12px 0 rgba(88,55,105,.2), 0 22px 55px rgba(61,36,75,.18);
+      overflow: hidden;
+    }
+
+    .app-tabs {
+      gap: 0;
+      padding: 16px 20px 18px;
+      border: 0;
+      background: rgba(255,255,255,.38);
+    }
+
+    .tab {
+      min-height: 58px;
+      border: 4px solid white;
+      border-radius: 21px;
+      background: #eee2f4;
+      color: #61447b;
+      font-size: clamp(14px, 1.7vw, 19px);
+      box-shadow: 0 0 0 3px #b797c9, 0 6px 0 rgba(90,58,111,.18), inset 0 3px 7px rgba(255,255,255,.8);
+    }
+
+    .tab i, .tab-symbol { margin-right: 7px; }
+    .tab + .tab { margin-left: 12px; }
+    .tab-symbol { display: inline-block; font-size: 1.12em; font-weight: 1000; line-height: 1; }
+    .tab.active {
+      background: #ef7eaf;
+      color: white;
+      box-shadow: 0 0 0 3px #d45491, 0 6px 0 rgba(128,54,95,.2), inset 0 3px 7px rgba(255,255,255,.38);
+    }
+
+    .game-layout {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 620px;
+      border-top: 3px solid rgba(139,98,189,.24);
+    }
+
+    .side-character {
+      position: absolute;
+      z-index: 4;
+      top: 246px;
+      width: min(285px, 22vw);
+      max-height: 455px;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 13px 9px rgba(72,45,84,.2));
+      animation: mascot-bob 2.9s ease-in-out infinite;
+    }
+    .kuromi-side { left: 0; }
+    .melody-side { right: 0; animation-duration: 3.2s; animation-delay: -1.1s; }
+
+    /* Wide landscape screens have generous side gardens: let both guides fill them. */
+    @media (min-width: 1400px) {
+      .side-character {
+        top: 220px;
+        width: 500px;
+        max-height: 750px;
+      }
+      .kuromi-side { left: -180px; }
+      .melody-side { right: -160px; }
+    }
+
+    .side-panel {
+      justify-content: flex-start;
+      padding: 32px 18px 0;
+      border-right: 4px solid rgba(139,98,189,.35);
+      background: rgba(222,195,240,.52);
+      overflow: hidden;
+    }
+    .side-panel::before, .side-panel::after { display: none; }
+
+    .speech-bubble {
+      width: min(280px, 92%);
+      margin: 0 auto 2px;
+      padding: 14px 17px;
+      border: 4px solid white;
+      border-radius: 24px;
+      background: #fffaf2;
+      color: #684781;
+      box-shadow: 0 0 0 3px #c79cba, 0 7px 0 rgba(87,51,104,.16);
+    }
+    .speech-bubble::after {
+      border: 0;
+      width: 22px;
+      height: 22px;
+      bottom: -10px;
+      background: #fffaf2;
+      box-shadow: 3px 3px 0 #c79cba;
+    }
+
+    .mascot-art {
+      display: block;
+      width: min(285px, 100%);
+      max-height: 365px;
+      margin: 12px auto -4px;
+      object-fit: contain;
+      object-position: center bottom;
+      filter: drop-shadow(0 13px 8px rgba(72,45,84,.2));
+      animation: mascot-bob 2.8s ease-in-out infinite;
+    }
+
+    .content-panel { width: 100%; padding: clamp(24px, 3vw, 38px); background: rgba(255,252,245,.82); }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+    .game-view, .plain-view, .learn-view { display: none; }
+    .game-view.active, .plain-view.active, .learn-view.active { display: block; }
+
+    .game-head { margin-bottom: 18px; }
+    .level-select {
+      min-height: 52px;
+      border: 4px solid white;
+      border-radius: 17px;
+      background: #efe4f4;
+      color: #62447b;
+      box-shadow: 0 0 0 3px #b794c7, 0 5px 0 rgba(86,54,102,.16);
+    }
+    .round-label { color: #6c4a80; }
+
+    .progress-track {
+      height: 16px;
+      border: 3px solid white;
+      background: #e7dde8;
+      box-shadow: 0 0 0 2px #bd9bc5;
+    }
+    .progress-fill { background: #9a6bc1; }
+
+    .question-card {
+      padding: 24px;
+      border: 4px solid #f0c3d7;
+      border-radius: 30px;
+      background: #fffaf2;
+      box-shadow: 0 7px 0 #d99ab9, inset 0 4px 12px rgba(255,255,255,.9);
+    }
+
+    .question-card h2 { color: #60407d; }
+    .question-card p, .listen-note { color: #a34f7d; }
+
+    .listen-button, .mini-listen {
+      border-color: white;
+      background: #f47aae;
+      box-shadow: 0 0 0 4px #d55b91, 0 8px 0 rgba(128,53,93,.2), inset 0 5px 10px rgba(255,255,255,.35);
+    }
+
+    .answer {
+      min-height: 102px;
+      border: 5px solid white;
+      border-radius: 26px;
+      background: #eee3f6;
+      color: #654287;
+      box-shadow: 0 0 0 4px #aa81c5, 0 8px 0 rgba(87,53,108,.18), inset 0 5px 10px rgba(255,255,255,.8);
+    }
+    .answer:nth-child(even) {
+      background: #ffd6e5;
+      color: #b64277;
+      box-shadow: 0 0 0 4px #e28bab, 0 8px 0 rgba(123,55,88,.17), inset 0 5px 10px rgba(255,255,255,.8);
+    }
+    .answer:hover { background: #f9e7f2; }
+    .answer.correct { background: #c9eed6; }
+    .answer.wrong { background: #ffd0dc; }
+
+    .feedback { color: #7d588f; }
+    .learn-heading { color: #60407d; }
+    .learn-subtitle { color: #8d6a9b; }
+
+    .voice-stage, .flashcard {
+      display: grid;
+      grid-template-columns: 124px 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 20px;
+      border: 4px solid #e7b4cf;
+      border-radius: 28px;
+      background: #fffaf2;
+      box-shadow: 0 7px 0 #d69cbd, inset 0 4px 10px rgba(255,255,255,.85);
+    }
+
+    .voice-stage { grid-template-columns: 1fr auto; text-align: center; }
+    .voice-symbol {
+      font-size: clamp(74px, 10vw, 108px);
+      font-weight: 1000;
+      line-height: 1;
+      color: #70469a;
+    }
+
+    .flash-symbol {
+      border: 5px solid white;
+      background: #eadcf4;
+      color: #6f4894;
+      box-shadow: 0 0 0 3px #a980c2, 0 6px 0 rgba(83,52,99,.18);
+    }
+    .flash-word { color: #744887; }
+    .flash-word small { color: #9a6d99; }
+
+    .symbol-grid { grid-template-columns: repeat(8, minmax(48px, 1fr)); gap: 10px; }
+    .symbol-button {
+      min-height: 50px;
+      border: 4px solid white;
+      border-radius: 16px;
+      background: #efe4f7;
+      color: #654283;
+      box-shadow: 0 0 0 2px #ae89c2, 0 4px 0 rgba(84,52,99,.17);
+    }
+    .symbol-button:nth-child(even) { background: #ffdbe8; color: #b74778; box-shadow: 0 0 0 2px #e392b2, 0 4px 0 rgba(111,53,83,.15); }
+    .symbol-button:hover, .symbol-button.active { background: #f5a7ca; color: white; }
+
+    .tone-box {
+      border: 4px solid #d7b4e4;
+      background: #f9f0fb;
+    }
+    .tone {
+      border: 3px solid white;
+      background: #eadff2;
+      color: #6f4b82;
+      box-shadow: 0 0 0 2px #b89ac6, 0 4px 0 rgba(80,51,94,.14);
+    }
+
+    .modal-card {
+      border: 5px solid white;
+      background: #fffaf2;
+      box-shadow: 0 0 0 5px #a475bb, 0 12px 0 rgba(73,46,87,.22);
+    }
+    .modal-icon { color: #f2ad3c; }
+    .restart-button {
+      border-color: white;
+      background: #ef75a9;
+      box-shadow: 0 0 0 4px #d1558b, 0 7px 0 rgba(121,48,83,.2);
+    }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-top: 13px; }
+    .modal-actions .restart-button { margin-top: 0; }
+    .home-return-button {
+      width: 100%;
+      min-height: 58px;
+      border: 4px solid white;
+      border-radius: 17px;
+      background: #9b70c0;
+      color: white;
+      font-size: 19px;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px #76539a, 0 7px 0 rgba(83,52,100,.2);
+    }
+    .footer-note { color: #644776; text-shadow: 0 1px 0 white; }
+    .voice-help {
+      width: min(760px, calc(100% - 24px));
+      margin: 12px auto 0;
+      padding: 11px 16px;
+      border: 3px solid rgba(255,255,255,.92);
+      border-radius: 16px;
+      background: rgba(255,250,240,.95);
+      color: #704c80;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 850;
+      box-shadow: 0 0 0 2px #c59fcf;
+    }
+    .voice-help[hidden] { display: none; }
+
+    @media (max-width: 1100px) {
+      .home-screen {
+        grid-template-columns: minmax(300px, .72fr) minmax(540px, 1.28fr);
+        gap: 26px;
+        width: calc(100% - 28px);
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      .home-characters { min-height: 520px; }
+      .home-mascots { height: 430px; }
+      .home-menu-panel { padding: 30px 26px; }
+      .home-game-grid { gap: 12px; }
+      .home-game-card { min-height: 200px; padding: 18px 14px; }
+      .home-card-title { font-size: 20px; }
+    }
+
+    @media (max-width: 900px) {
+      .home-screen {
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 26px;
+        min-height: 100vh;
+        padding-top: 112px;
+      }
+      .home-menu-panel { order: 1; }
+      .home-characters {
+        order: 2;
+        min-height: 410px;
+      }
+      .home-greeting {
+        align-self: center;
+        width: min(360px, 76%);
+        margin: 0 0 2px;
+      }
+      .home-mascots { height: 350px; }
+      .home-kuromi { left: 10%; width: min(300px, 48%); }
+      .home-melody { right: 10%; width: min(285px, 46%); }
+    }
+
+    @media (max-width: 850px) {
+      .page-shell { width: calc(100% - 14px); }
+      .topbar, .app { width: calc(100% - 74px); }
+      .topbar { grid-template-columns: 62px minmax(0,1fr) 62px; gap: 12px; }
+      .round-control { width: 58px; height: 58px; font-size: 24px; border-width: 4px; }
+      .progress-island { min-height: 62px; padding: 3px 8px 5px; }
+      .progress-title { font-size: 17px; margin-bottom: 7px; }
+      .top-stars { font-size: 14px; }
+      .journey-steps { gap: 0; }
+      .journey-step + .journey-step { margin-left: 9px; }
+      .journey-step { min-width: 0; height: auto; border: 0; font-size: 20px; }
+      .game-layout { grid-template-columns: 1fr; }
+      .side-character { top: 268px; width: 155px; max-height: 280px; }
+      .side-panel {
+        min-height: 285px;
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 4px;
+        padding: 16px 18px 0;
+        border-right: 0;
+        border-bottom: 4px solid rgba(139,98,189,.35);
+      }
+      .speech-bubble { width: 46%; align-self: center; margin: 0 0 28px; }
+      .speech-bubble::after { left: auto; right: -9px; bottom: calc(50% - 10px); transform: rotate(-45deg); }
+      .mascot-art { width: min(260px, 52%); max-height: 280px; margin: 0; }
+      .symbol-grid { grid-template-columns: repeat(7, minmax(42px, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .home-screen {
+        width: calc(100% - 14px);
+        padding: 92px 0 24px;
+      }
+      .home-header { top: max(12px, env(safe-area-inset-top)); left: 7px; right: 7px; }
+      .home-logo { gap: 9px; }
+      .home-logo-mark { width: 52px; height: 52px; border-width: 3px; border-radius: 17px; font-size: 23px; }
+      .home-logo strong { font-size: 21px; }
+      .home-logo small { font-size: 9px; letter-spacing: .12em; }
+      .home-sound-control { width: 50px; height: 50px; border-width: 3px; border-radius: 17px; font-size: 21px; }
+      .home-menu-panel { padding: 25px 18px 27px; border-width: 4px; border-radius: 28px; }
+      .home-menu-panel h1 { font-size: 34px; }
+      .home-menu-subtitle { margin-bottom: 18px; }
+      .home-game-grid { grid-template-columns: 1fr; gap: 14px; }
+      .home-game-card {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        align-items: center;
+        gap: 0 13px;
+        min-height: 118px;
+        padding: 14px;
+      }
+      .home-card-icon { grid-row: 1 / span 2; width: 54px; height: 54px; margin: 0; }
+      .home-card-title { align-self: end; margin-bottom: 2px; padding-right: 64px; font-size: 20px; }
+      .home-card-copy { align-self: start; font-size: 13px; }
+      .home-tip { margin-top: 18px; font-size: 12px; }
+      .home-characters { min-height: 330px; }
+      .home-greeting { padding: 12px 16px; border-width: 3px; }
+      .home-greeting strong { font-size: 18px; }
+      .home-mascots { height: 278px; }
+      .home-kuromi { left: 4%; width: 55%; }
+      .home-melody { right: 4%; width: 52%; }
+      .page-shell { width: calc(100% - 10px); padding-top: 10px; }
+      .topbar, .app { width: 100%; }
+      .topbar { grid-template-columns: 50px minmax(0,1fr) 50px; gap: 8px; }
+      .round-control { width: 46px; height: 46px; font-size: 20px; border-width: 3px; }
+      .progress-island { min-height: 56px; border-width: 3px; padding: 7px 10px; }
+      .progress-title { font-size: 14px; }
+      .top-stars { font-size: 12px; }
+      .journey-steps { gap: 0; }
+      .journey-step + .journey-step { margin-left: 5px; }
+      .journey-step { min-width: 0; height: auto; border: 0; font-size: 14px; }
+      .app { border-radius: 28px; border-width: 4px; }
+      .app-tabs { gap: 0; padding: 11px; overflow-x: auto; }
+      .tab + .tab { margin-left: 7px; }
+      .tab { flex: 0 0 auto; min-width: 134px; min-height: 50px; padding: 0 11px; font-size: 14px; }
+      .side-character { display: none; }
+      .side-panel { min-height: 230px; padding: 10px 12px 0; }
+      .speech-bubble { width: 47%; margin-bottom: 20px; font-size: 14px; }
+      .mascot-art { width: 53%; max-height: 225px; }
+      .content-panel { padding: 20px 15px 25px; }
+      .game-head { align-items: stretch; }
+      .answers { gap: 12px; }
+      .answer { min-height: 83px; }
+      .voice-stage, .flashcard { grid-template-columns: 82px 1fr auto; padding: 15px; gap: 10px; }
+      .voice-stage { grid-template-columns: 1fr auto; }
+      .symbol-grid { grid-template-columns: repeat(6, minmax(38px, 1fr)); gap: 8px; }
+      .symbol-button { min-height: 44px; }
+    }
+  </style>
+</head>
+<body class="home-active">
+  <main class="home-screen" id="homeScreen" aria-label="選擇注音遊戲">
+    <header class="home-header">
+      <div class="home-logo" aria-label="注音魔法屋">
+        <span class="home-logo-mark" aria-hidden="true"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+        <span>
+          <strong>注音魔法屋</strong>
+          <small>PLAY・LISTEN・LEARN</small>
+        </span>
+      </div>
+      <button class="home-sound-control" id="homeSoundToggle" data-sound-toggle type="button" aria-label="關閉聲音" aria-pressed="false">
+        <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <section class="home-characters" aria-label="庫洛米和美樂蒂邀請妳一起玩">
+      <div class="home-greeting">
+        <strong>一起玩注音吧！</strong>
+        <span>選一張卡片開始冒險</span>
+      </div>
+      <div class="home-mascots" aria-hidden="true">
+        <img class="home-mascot home-kuromi" src="assets/kuromi-guide.png" alt="" />
+        <img class="home-mascot home-melody" src="assets/melody-side.png" alt="" />
+      </div>
+    </section>
+
+    <section class="home-menu-panel" aria-labelledby="homeMenuTitle">
+      <p class="home-eyebrow">選擇遊戲</p>
+      <h1 id="homeMenuTitle" tabindex="-1">今天想玩哪一個？</h1>
+      <p class="home-menu-subtitle">選一個玩法，跟著庫洛米和美樂蒂一起認識注音！</p>
+
+      <div class="home-game-grid">
+        <button class="home-game-card" type="button" data-home-view="plain">
+          <span class="home-card-type">學習</span>
+          <span class="home-card-icon" aria-hidden="true"><i class="fa-solid fa-volume-high"></i></span>
+          <span class="home-card-title">注音小卡</span>
+          <span class="home-card-copy">點一個注音，只聽它的聲音，不顯示範例。</span>
+        </button>
+        <button class="home-game-card" type="button" data-home-view="magic">
+          <span class="home-card-type">學習</span>
+          <span class="home-card-icon" aria-hidden="true"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+          <span class="home-card-title">小卡魔法版</span>
+          <span class="home-card-copy">聽發音、看詞語，還能練習五種聲調。</span>
+        </button>
+        <button class="home-game-card" type="button" data-home-view="game">
+          <span class="home-card-type is-test">測驗</span>
+          <span class="home-card-icon" aria-hidden="true"><i class="fa-solid fa-headphones"></i></span>
+          <span class="home-card-title">聽音選字</span>
+          <span class="home-card-copy">聽聲音，找出正確的注音。每回合 10 題。</span>
+        </button>
+      </div>
+
+      <p class="home-tip"><i class="fa-solid fa-heart" aria-hidden="true"></i> 每次玩 5～10 分鐘，記得讓眼睛休息一下。</p>
+    </section>
+  </main>
+
+  <main class="page-shell" id="gameShell" hidden>
+    <header class="topbar">
+      <button class="round-control" id="homeButton" type="button" aria-label="回到遊戲主頁">
+        <i class="fa-solid fa-house" aria-hidden="true"></i>
+      </button>
+      <div class="progress-island">
+        <div class="progress-title">
+          <span>注音魔法屋</span>
+          <span class="top-stars"><i class="fa-solid fa-star" aria-hidden="true"></i> <span id="starCount">0</span></span>
+        </div>
+        <div class="journey-steps" id="journeySteps" aria-label="答題進度"></div>
+      </div>
+      <button class="round-control" id="soundToggle" data-sound-toggle type="button" aria-label="關閉聲音" aria-pressed="false">
+        <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <img class="side-character kuromi-side" src="assets/kuromi-guide.png" alt="庫洛米站在左邊拿著魔法棒" />
+    <img class="side-character melody-side" src="assets/melody-side.png" alt="美樂蒂站在右邊拿著花朵" />
+
+    <section class="app" aria-label="注音學習遊戲">
+      <nav class="app-tabs" aria-label="選擇玩法">
+        <button class="tab" type="button" data-view="plain" aria-selected="false"><span class="tab-symbol" aria-hidden="true">ㄅ</span>注音小卡</button>
+        <button class="tab" type="button" data-view="magic" aria-selected="false"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>小卡魔法版</button>
+        <button class="tab active" type="button" data-view="game" aria-selected="true"><i class="fa-solid fa-headphones" aria-hidden="true"></i>聽音選字</button>
+      </nav>
+
+      <div class="game-layout">
+        <div class="content-panel">
+          <div class="visually-hidden" id="mascotSpeech" aria-live="polite"></div>
+          <section class="game-view active" id="gameView" aria-labelledby="gameTitle">
+            <div class="game-head">
+              <select class="level-select" id="levelSelect" aria-label="選擇練習範圍">
+                <option value="initials">第一關：聲母</option>
+                <option value="finals">第二關：韻母</option>
+                <option value="all">大挑戰：全部注音</option>
+              </select>
+              <div class="round-label">第 <span id="roundNumber">1</span> / 10 題</div>
+            </div>
+            <div class="progress-track" aria-label="本回合進度">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="question-card">
+              <h2 id="gameTitle">聽聽看，是哪一個注音？</h2>
+              <p>會自動播放，也可以按喇叭再聽一次</p>
+              <button class="listen-button" id="listenButton" type="button" aria-label="播放題目聲音"><i class="fa-solid fa-volume-high" aria-hidden="true"></i></button>
+              <span class="listen-note">可以重複聽很多次喔！</span>
+            </div>
+
+            <div class="answers" id="answers" aria-label="答案選項"></div>
+            <div class="feedback" id="feedback" role="status" aria-live="polite">選一個妳聽到的注音吧！</div>
+          </section>
+
+          <section class="plain-view" id="plainView" aria-labelledby="plainTitle">
+            <h2 class="learn-heading" id="plainTitle">注音小卡</h2>
+            <p class="learn-subtitle">點一個注音，只聽它的聲音。</p>
+
+            <div class="voice-stage">
+              <div class="voice-symbol" id="plainSymbol">ㄅ</div>
+              <button class="mini-listen" id="plainListen" type="button" aria-label="再念一次"><i class="fa-solid fa-volume-high" aria-hidden="true"></i></button>
+            </div>
+
+            <div class="symbol-section">
+              <h3>聲母・21 個</h3>
+              <div class="symbol-grid" id="plainInitialGrid"></div>
+            </div>
+            <div class="symbol-section">
+              <h3>韻母・16 個</h3>
+              <div class="symbol-grid" id="plainFinalGrid"></div>
+            </div>
+          </section>
+
+          <section class="learn-view" id="magicView" aria-labelledby="magicTitle">
+            <h2 class="learn-heading" id="magicTitle">注音小卡魔法版</h2>
+            <p class="learn-subtitle">點一個注音，就能聽聲音、看例子。</p>
+
+            <div class="flashcard">
+              <div class="flash-symbol" id="flashSymbol">ㄅ</div>
+              <div class="flash-word" id="flashWord">包包<small>ㄅㄠ ㄅㄠ・聲母</small></div>
+              <button class="mini-listen" id="flashListen" type="button" aria-label="播放小卡聲音"><i class="fa-solid fa-volume-high" aria-hidden="true"></i></button>
+            </div>
+
+            <div class="symbol-section">
+              <h3>聲母小隊・21 個</h3>
+              <div class="symbol-grid" id="initialGrid"></div>
+            </div>
+            <div class="symbol-section">
+              <h3>韻母小隊・16 個</h3>
+              <div class="symbol-grid" id="finalGrid"></div>
+            </div>
+
+            <div class="tone-box">
+              <h3>聲調魔法・點點看</h3>
+              <div class="tones">
+                <button class="tone" type="button" data-say="第一聲，ㄅㄚ">一聲　ㄅㄚ</button>
+                <button class="tone" type="button" data-say="第二聲，ㄅㄚˊ">二聲　ㄅㄚˊ</button>
+                <button class="tone" type="button" data-say="第三聲，ㄅㄚˇ">三聲　ㄅㄚˇ</button>
+                <button class="tone" type="button" data-say="第四聲，ㄅㄚˋ">四聲　ㄅㄚˋ</button>
+                <button class="tone" type="button" data-say="輕聲，ㄅㄚ˙">輕聲　ㄅㄚ˙</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <p class="footer-note">給小朋友的溫馨提醒：每玩 10 分鐘，記得讓眼睛休息一下。</p>
+    <p class="voice-help" id="voiceHelp" hidden>沒有聽到聲音？請先調高 iPad 音量，再到「設定 → 輔助使用 → 閱讀與朗讀」（舊版名稱為「朗讀內容」）選擇中文（台灣）聲音。</p>
+  </main>
+
+  <div class="round-modal" id="roundModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-icon" aria-hidden="true"><i class="fa-solid fa-trophy"></i></div>
+      <h2 id="modalTitle">魔法挑戰完成！</h2>
+      <p id="modalMessage">妳得到了 10 顆星星！</p>
+      <div class="modal-actions">
+        <button class="home-return-button" id="modalHomeButton" type="button">回到主頁</button>
+        <button class="restart-button" id="restartButton" type="button">再玩一次</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bopomofo = [
+      { char: "ㄅ", type: "initials", word: "包包 🎒", spell: "ㄅㄠ ㄅㄠ" },
+      { char: "ㄆ", type: "initials", word: "葡萄 🍇", spell: "ㄆㄨˊ ㄊㄠˊ" },
+      { char: "ㄇ", type: "initials", word: "貓咪 🐱", spell: "ㄇㄠ ㄇㄧ" },
+      { char: "ㄈ", type: "initials", word: "飛機 ✈️", spell: "ㄈㄟ ㄐㄧ" },
+      { char: "ㄉ", type: "initials", word: "蛋糕 🍰", spell: "ㄉㄢˋ ㄍㄠ" },
+      { char: "ㄊ", type: "initials", word: "太陽 ☀️", spell: "ㄊㄞˋ ㄧㄤˊ" },
+      { char: "ㄋ", type: "initials", word: "牛奶 🥛", spell: "ㄋㄧㄡˊ ㄋㄞˇ" },
+      { char: "ㄌ", type: "initials", word: "蘿蔔 🥕", spell: "ㄌㄨㄛˊ ㄅㄛ˙" },
+      { char: "ㄍ", type: "initials", word: "狗狗 🐶", spell: "ㄍㄡˇ ㄍㄡˇ" },
+      { char: "ㄎ", type: "initials", word: "恐龍 🦖", spell: "ㄎㄨㄥˇ ㄌㄨㄥˊ" },
+      { char: "ㄏ", type: "initials", word: "花朵 🌸", spell: "ㄏㄨㄚ ㄉㄨㄛˇ" },
+      { char: "ㄐ", type: "initials", word: "橘子 🍊", spell: "ㄐㄩˊ ㄗ˙" },
+      { char: "ㄑ", type: "initials", word: "氣球 🎈", spell: "ㄑㄧˋ ㄑㄧㄡˊ" },
+      { char: "ㄒ", type: "initials", word: "西瓜 🍉", spell: "ㄒㄧ ㄍㄨㄚ" },
+      { char: "ㄓ", type: "initials", word: "蜘蛛 🕷️", spell: "ㄓ ㄓㄨ" },
+      { char: "ㄔ", type: "initials", word: "車子 🚗", spell: "ㄔㄜ ㄗ˙" },
+      { char: "ㄕ", type: "initials", word: "獅子 🦁", spell: "ㄕ ㄗ˙" },
+      { char: "ㄖ", type: "initials", word: "日出 🌅", spell: "ㄖˋ ㄔㄨ" },
+      { char: "ㄗ", type: "initials", word: "走路 🚶", spell: "ㄗㄡˇ ㄌㄨˋ" },
+      { char: "ㄘ", type: "initials", word: "草莓 🍓", spell: "ㄘㄠˇ ㄇㄟˊ" },
+      { char: "ㄙ", type: "initials", word: "森林 🌲", spell: "ㄙㄣ ㄌㄧㄣˊ" },
+      { char: "ㄧ", type: "finals", word: "衣服 👕", spell: "ㄧ ㄈㄨˊ" },
+      { char: "ㄨ", type: "finals", word: "烏龜 🐢", spell: "ㄨ ㄍㄨㄟ" },
+      { char: "ㄩ", type: "finals", word: "魚兒 🐟", spell: "ㄩˊ ㄦˊ" },
+      { char: "ㄚ", type: "finals", word: "阿姨 👩", spell: "ㄚ ㄧˊ" },
+      { char: "ㄛ", type: "finals", word: "喔！ 💡", spell: "ㄛ" },
+      { char: "ㄜ", type: "finals", word: "白鵝 🦢", spell: "ㄅㄞˊ ㄜˊ" },
+      { char: "ㄝ", type: "finals", word: "鞋子 👟", spell: "ㄒㄧㄝˊ ㄗ˙" },
+      { char: "ㄞ", type: "finals", word: "愛心 💗", spell: "ㄞˋ ㄒㄧㄣ" },
+      { char: "ㄟ", type: "finals", word: "杯子 🥤", spell: "ㄅㄟ ㄗ˙" },
+      { char: "ㄠ", type: "finals", word: "小貓 🐈", spell: "ㄒㄧㄠˇ ㄇㄠ" },
+      { char: "ㄡ", type: "finals", word: "小狗 🐕", spell: "ㄒㄧㄠˇ ㄍㄡˇ" },
+      { char: "ㄢ", type: "finals", word: "藍莓 🫐", spell: "ㄌㄢˊ ㄇㄟˊ" },
+      { char: "ㄣ", type: "finals", word: "大門 🚪", spell: "ㄉㄚˋ ㄇㄣˊ" },
+      { char: "ㄤ", type: "finals", word: "糖果 🍬", spell: "ㄊㄤˊ ㄍㄨㄛˇ" },
+      { char: "ㄥ", type: "finals", word: "風箏 🪁", spell: "ㄈㄥ ㄓㄥ" },
+      { char: "ㄦ", type: "finals", word: "耳朵 👂", spell: "ㄦˇ ㄉㄨㄛˇ" }
+    ];
+
+    const state = {
+      round: 1,
+      score: 0,
+      target: null,
+      locked: false,
+      level: "initials",
+      lastTarget: null,
+      muted: false,
+      questionHadWrong: false,
+      results: [],
+      screen: "home",
+      view: "game",
+      pendingFinish: false,
+      transitionId: 0
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+    const answersEl = $("#answers");
+    const feedbackEl = $("#feedback");
+    const listenButton = $("#listenButton");
+
+    function shuffle(items) {
+      const result = [...items];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    function activePool() {
+      return state.level === "all" ? bopomofo : bopomofo.filter(item => item.type === state.level);
+    }
+
+    let preferredVoice = null;
+
+    function loadPreferredVoice() {
+      if (!("speechSynthesis" in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return null;
+      const language = voice => (voice.lang || "").toLowerCase().replace("_", "-");
+      preferredVoice =
+        voices.find(voice => language(voice) === "zh-tw") ||
+        voices.find(voice => language(voice).startsWith("zh-hant")) ||
+        voices.find(voice => language(voice).startsWith("zh")) ||
+        null;
+      return preferredVoice;
+    }
+
+    function showVoiceHelp() {
+      const hint = $("#voiceHelp");
+      if (hint) hint.hidden = false;
+    }
+
+    function cancelSpeechPlayback() {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      $$(".speaking").forEach(element => element.classList.remove("speaking"));
+    }
+
+    function say(text, button) {
+      if (state.muted || state.screen !== "game") return;
+      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        feedbackEl.textContent = "這個瀏覽器沒有語音功能，可以請大人一起念喔！";
+        showVoiceHelp();
+        return;
+      }
+      const synth = window.speechSynthesis;
+      loadPreferredVoice();
+      synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = preferredVoice ? preferredVoice.lang : "zh-TW";
+      if (preferredVoice) utterance.voice = preferredVoice;
+      utterance.rate = 0.7;
+      utterance.pitch = 1.08;
+      utterance.volume = 1;
+      if (button) button.classList.add("speaking");
+      utterance.onend = () => button && button.classList.remove("speaking");
+      utterance.onerror = event => {
+        if (button) button.classList.remove("speaking");
+        if (event.error !== "interrupted" && event.error !== "canceled") showVoiceHelp();
+      };
+      synth.speak(utterance);
+      window.setTimeout(() => {
+        if (synth.paused) synth.resume();
+      }, 120);
+    }
+
+    function cleanWord(text) {
+      return text.split(" ")[0].trim();
+    }
+
+    function buildJourneySteps() {
+      const journey = $("#journeySteps");
+      journey.innerHTML = "";
+      for (let number = 1; number <= 10; number++) {
+        const step = document.createElement("span");
+        step.className = "journey-step";
+        step.innerHTML = '<i class="fa-solid fa-star"></i>';
+        step.setAttribute("aria-label", `第 ${number} 題`);
+        step.setAttribute("aria-hidden", "true");
+        journey.appendChild(step);
+      }
+      updateJourney();
+    }
+
+    function updateJourney() {
+      $$(".journey-step").forEach((step, index) => {
+        const result = state.results[index];
+        step.classList.toggle("correct", result === true);
+        step.classList.toggle("wrong", result === false);
+        step.classList.toggle("current", index + 1 === state.round && result === undefined);
+      });
+    }
+
+    function speakQuestion() {
+      if (!state.target || state.screen !== "game" || state.view !== "game") return;
+      say(`請找出，${state.target.char}`, listenButton);
+    }
+
+    function createQuestion(autoSpeak = true) {
+      state.locked = false;
+      state.questionHadWrong = false;
+      const pool = activePool();
+      const possible = pool.filter(item => item.char !== state.lastTarget);
+      state.target = possible[Math.floor(Math.random() * possible.length)] || pool[0];
+      state.lastTarget = state.target.char;
+
+      const distractors = shuffle(pool.filter(item => item.char !== state.target.char)).slice(0, 3);
+      const choices = shuffle([state.target, ...distractors]);
+      answersEl.innerHTML = "";
+
+      choices.forEach(item => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "answer";
+        button.textContent = item.char;
+        button.setAttribute("aria-label", `答案 ${item.char}`);
+        button.addEventListener("click", () => checkAnswer(button, item));
+        answersEl.appendChild(button);
+      });
+
+      $("#roundNumber").textContent = state.round;
+      $("#progressFill").style.width = `${state.round * 10}%`;
+      updateJourney();
+      feedbackEl.className = "feedback";
+      feedbackEl.textContent = "選一個妳聽到的注音吧！";
+      $("#mascotSpeech").innerHTML = "仔細聽喔！<br>答案就在右邊。";
+      if (autoSpeak) window.setTimeout(speakQuestion, 350);
+    }
+
+    function checkAnswer(button, item) {
+      if (state.locked) return;
+
+      if (item.char === state.target.char) {
+        state.locked = true;
+        state.results[state.round - 1] = true;
+        button.classList.add("correct");
+        $$(".answer").forEach(answer => answer.disabled = true);
+        state.score += 1;
+        $("#starCount").textContent = state.score;
+        updateJourney();
+        feedbackEl.className = "feedback good";
+        feedbackEl.textContent = `答對了！${state.target.char}，${cleanWord(state.target.word)}的注音。`;
+        $("#mascotSpeech").innerHTML = "太厲害了！<br>送妳一顆星星。";
+        celebrate(10);
+        say(`答對了！${state.target.char}，${cleanWord(state.target.word)}`, null);
+
+        const transitionId = ++state.transitionId;
+        window.setTimeout(() => {
+          if (transitionId !== state.transitionId) return;
+          if (state.round >= 10) {
+            finishRound();
+          } else {
+            state.round += 1;
+            createQuestion(true);
+          }
+        }, 1100);
+      } else {
+        state.questionHadWrong = true;
+        button.classList.remove("wrong");
+        void button.offsetWidth;
+        button.classList.add("wrong");
+        feedbackEl.className = "feedback try";
+        feedbackEl.textContent = "差一點點，再聽一次就會找到囉！";
+        $("#mascotSpeech").innerHTML = "沒關係～<br>再試一次！";
+        window.setTimeout(speakQuestion, 380);
+      }
+    }
+
+    function finishRound() {
+      if (state.screen !== "game" || state.view !== "game") {
+        state.pendingFinish = true;
+        return;
+      }
+      state.pendingFinish = false;
+      $("#modalMessage").textContent = `妳答對了 ${state.score} 題，得到 ${state.score} 顆星星！`;
+      $("#roundModal").classList.add("show");
+      $("#progressFill").style.width = "100%";
+      celebrate(34);
+      say(`魔法挑戰完成！得到 ${state.score} 顆星星！`, null);
+      $("#restartButton").focus();
+    }
+
+    function restartGame() {
+      state.transitionId += 1;
+      state.round = 1;
+      state.score = 0;
+      state.lastTarget = null;
+      state.questionHadWrong = false;
+      state.results = [];
+      state.pendingFinish = false;
+      $("#starCount").textContent = "0";
+      $("#roundModal").classList.remove("show");
+      createQuestion();
+    }
+
+    function celebrate(count) {
+      const colors = ["#ff5ba8", "#ffd85c", "#9967d8", "#5dcf9c", "#ffffff"];
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement("span");
+        piece.className = "confetti-piece";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = `${Math.random() * .35}s`;
+        piece.style.transform = `rotate(${Math.random() * 180}deg)`;
+        document.body.appendChild(piece);
+        window.setTimeout(() => piece.remove(), 1900);
+      }
+    }
+
+    function selectFlashcard(item, button) {
+      $("#flashSymbol").textContent = item.char;
+      $("#flashWord").innerHTML = `${cleanWord(item.word)}<small>${item.spell}・${item.type === "initials" ? "聲母" : "韻母"}</small>`;
+      $$(".magic-symbol").forEach(symbol => symbol.classList.remove("active"));
+      if (button) button.classList.add("active");
+      $("#flashListen").dataset.char = item.char;
+      say(`${item.char}，${cleanWord(item.word)}`, $("#flashListen"));
+    }
+
+    function selectPlainCard(item, button) {
+      $("#plainSymbol").textContent = item.char;
+      $("#plainListen").dataset.char = item.char;
+      $$(".plain-symbol-button").forEach(symbol => symbol.classList.remove("active"));
+      if (button) button.classList.add("active");
+      say(item.char, $("#plainListen"));
+    }
+
+    function buildSymbolGrids() {
+      const groups = [
+        { type: "initials", element: $("#initialGrid"), mode: "magic" },
+        { type: "finals", element: $("#finalGrid"), mode: "magic" },
+        { type: "initials", element: $("#plainInitialGrid"), mode: "plain" },
+        { type: "finals", element: $("#plainFinalGrid"), mode: "plain" }
+      ];
+
+      groups.forEach(group => {
+        bopomofo.filter(item => item.type === group.type).forEach(item => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `symbol-button ${group.mode === "magic" ? "magic-symbol" : "plain-symbol-button"}`;
+          button.textContent = item.char;
+          button.setAttribute("aria-label", group.mode === "magic" ? `${item.char}，${cleanWord(item.word)}` : `播放 ${item.char}`);
+          button.addEventListener("click", () => group.mode === "magic" ? selectFlashcard(item, button) : selectPlainCard(item, button));
+          group.element.appendChild(button);
+        });
+      });
+      $(".magic-symbol").classList.add("active");
+      $(".plain-symbol-button").classList.add("active");
+      $("#flashListen").dataset.char = "ㄅ";
+      $("#plainListen").dataset.char = "ㄅ";
+    }
+
+    function activateView(viewName, announce = true) {
+      state.view = viewName;
+      cancelSpeechPlayback();
+      $$(".tab").forEach(item => {
+        const selected = item.dataset.view === viewName;
+        item.classList.toggle("active", selected);
+        item.setAttribute("aria-selected", selected ? "true" : "false");
+      });
+      $("#gameView").classList.toggle("active", viewName === "game");
+      $("#plainView").classList.toggle("active", viewName === "plain");
+      $("#magicView").classList.toggle("active", viewName === "magic");
+
+      const messages = {
+        game: "仔細聽喔！<br>答案就在右邊。",
+        plain: "點一下小卡，<br>只聽注音的聲音。",
+        magic: "魔法小卡有<br>詞語和聲調喔！"
+      };
+      $("#mascotSpeech").innerHTML = messages[viewName];
+      if (viewName === "game" && state.pendingFinish && state.screen === "game") {
+        finishRound();
+      } else if (viewName === "game" && announce && state.screen === "game") {
+        speakQuestion();
+      }
+    }
+
+    function syncSoundControls() {
+      $$('[data-sound-toggle]').forEach(button => {
+        button.setAttribute("aria-pressed", state.muted ? "true" : "false");
+        button.setAttribute("aria-label", state.muted ? "開啟聲音" : "關閉聲音");
+        button.innerHTML = `<i class="fa-solid ${state.muted ? "fa-volume-xmark" : "fa-volume-high"}" aria-hidden="true"></i>`;
+      });
+    }
+
+    function toggleSound() {
+      state.muted = !state.muted;
+      if (state.muted) cancelSpeechPlayback();
+      syncSoundControls();
+      if (!state.muted) loadPreferredVoice();
+    }
+
+    function showHomeMenu() {
+      state.screen = "home";
+      cancelSpeechPlayback();
+      $("#roundModal").classList.remove("show");
+      $$(".confetti-piece").forEach(piece => piece.remove());
+      $("#gameShell").hidden = true;
+      $("#homeScreen").hidden = false;
+      document.body.classList.add("home-active");
+      window.scrollTo(0, 0);
+      $("#homeMenuTitle").focus();
+    }
+
+    function launchGame(viewName) {
+      state.screen = "game";
+      loadPreferredVoice();
+      $("#homeScreen").hidden = true;
+      $("#gameShell").hidden = false;
+      document.body.classList.remove("home-active");
+      window.scrollTo(0, 0);
+      activateView(viewName, false);
+
+      if (viewName === "game") {
+        if (state.round >= 10 && state.locked) restartGame();
+        else if (state.pendingFinish) finishRound();
+        else speakQuestion();
+      }
+
+      window.setTimeout(() => {
+        const selectedTab = $(".tab.active");
+        if (selectedTab) selectedTab.focus();
+      }, 0);
+    }
+
+    $$(".tab").forEach(tab => tab.addEventListener("click", () => activateView(tab.dataset.view)));
+    $$(".home-game-card").forEach(card => card.addEventListener("click", () => launchGame(card.dataset.homeView)));
+
+    $("#levelSelect").addEventListener("change", (event) => {
+      state.level = event.target.value;
+      restartGame();
+    });
+    listenButton.addEventListener("click", speakQuestion);
+    $("#homeButton").addEventListener("click", showHomeMenu);
+    $$('[data-sound-toggle]').forEach(button => button.addEventListener("click", toggleSound));
+    $("#restartButton").addEventListener("click", restartGame);
+    $("#modalHomeButton").addEventListener("click", showHomeMenu);
+    $("#plainListen").addEventListener("click", () => say($("#plainListen").dataset.char || "ㄅ", $("#plainListen")));
+    $("#flashListen").addEventListener("click", () => {
+      const item = bopomofo.find(entry => entry.char === $("#flashListen").dataset.char) || bopomofo[0];
+      say(`${item.char}，${cleanWord(item.word)}`, $("#flashListen"));
+    });
+    $$(".tone").forEach(button => button.addEventListener("click", () => say(button.dataset.say, button)));
+    $("#roundModal").addEventListener("click", event => {
+      if (event.target === $("#roundModal")) restartGame();
+    });
+
+    function primeIPadVoice() {
+      loadPreferredVoice();
+      document.removeEventListener("touchend", primeIPadVoice, false);
+      document.removeEventListener("click", primeIPadVoice, false);
+    }
+
+    if ("speechSynthesis" in window) {
+      loadPreferredVoice();
+      if (typeof window.speechSynthesis.addEventListener === "function") {
+        window.speechSynthesis.addEventListener("voiceschanged", loadPreferredVoice);
+      } else {
+        window.speechSynthesis.onvoiceschanged = loadPreferredVoice;
+      }
+      document.addEventListener("touchend", primeIPadVoice, false);
+      document.addEventListener("click", primeIPadVoice, false);
+    }
+
+    buildJourneySteps();
+    buildSymbolGrids();
+    createQuestion(false);
+    syncSoundControls();
+  </script>
+</body>
+</html>
